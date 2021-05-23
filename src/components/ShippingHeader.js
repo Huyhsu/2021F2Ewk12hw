@@ -1,8 +1,6 @@
 import { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { StoreContext } from "../store";
-import CartSummary from "./CartSummary";
-import UserInfo from "./UserInfo";
 import CheckoutSteps from "./CheckoutSteps";
 import { setPage } from "../actions"
 

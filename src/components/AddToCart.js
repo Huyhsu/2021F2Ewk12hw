@@ -5,7 +5,7 @@ import { CartIcon } from "./Icons";
 import { addCartItem } from "../actions";
 
 export default function AddToCart() {
-  const { state: { cartItems, productDetail: { product, qty } }, dispatch } = useContext(StoreContext);
+  const { state: { cart: { cartItems }, productDetail: { product, qty } }, dispatch } = useContext(StoreContext);
 
   const openNotification = () => {
     notification.open({

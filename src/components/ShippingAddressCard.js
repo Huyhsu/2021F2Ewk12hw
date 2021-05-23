@@ -6,7 +6,6 @@ import { StoreContext } from "../store";
 
 export default function ShippingAddressCard() {
   const { state: { cart: { shippingAddress } }, dispatch } = useContext(StoreContext);
-  const { fullName, address, city, postalCode, country} = shippingAddress;
   const history = useHistory()
   const [form] = Form.useForm();
 
