@@ -28,6 +28,10 @@ import {
   BEGIN_ORDER_CREATE,
   SUCCESS_ORDER_CREATE,
   FAIL_ORDER_CREATE,
+  RESET_ORDER,
+  BEGIN_ORDER_DETAIL,
+  SUCCESS_ORDER_DETAIL,
+  FAIL_ORDER_DETAIL,
 } from "../utils/constants";
 
 import {
@@ -38,7 +42,9 @@ import {
   registerWithEmailPassword,
   signOut,
   updateUserInfoApi,
-  addOrderApi
+  createOrderApi,
+  getOrderById,
+  checkLoginApi,
 } from "../api";
 
 export const addCartItem = (dispatch, product, qty) => {
@@ -212,7 +218,7 @@ export const logoutFromFirebase = async (dispatch) => {
   dispatch({ type: LOGOUT_REQUEST });
 }
 
-export const addOrdertoFirebase = async (dispatch, cart) => {
+export const createOrder = async (dispatch, cart) => {
   dispatch({ type: BEGIN_ORDER_CREATE });
   try {
     const item = {
@@ -224,7 +230,7 @@ export const addOrdertoFirebase = async (dispatch, cart) => {
       taxPrice: cart.taxPrice,
       totalPrice: cart.totalPrice,
     };    
-    const orderInfo = await addOrderApi(item);
+    const orderInfo = await createOrderApi(item);
     dispatch({ 
       type: SUCCESS_ORDER_CREATE, 
       payload: orderInfo 
@@ -238,7 +244,33 @@ export const addOrdertoFirebase = async (dispatch, cart) => {
     dispatch({ type: FAIL_ORDER_CREATE, payload: error });
     return null;
   }  
-
-
 };
 
+export const requestOrderDetail = async (dispatch, orderId) => {
+  dispatch({ type: BEGIN_ORDER_DETAIL });
+  try {
+    const order = await getOrderById(orderId);
+    dispatch({ 
+      type: SUCCESS_ORDER_DETAIL,
+      payload: order
+    });
+  } catch (error) {
+    dispatch({ 
+      type: FAIL_ORDER_DETAIL, 
+      payload: error 
+    });
+  }
+}
+
+export const resetOrder = (dispatch) => {
+  dispatch({ type: RESET_ORDER });
+}
+
+export const checkLogin = (dispatch) => {
+  const isLogin = checkLoginApi();
+  if(!isLogin) {
+    localStorage.removeItem('orderInfo')
+    dispatch({ type: LOGOUT_REQUEST });    
+  }
+  return isLogin;
+}

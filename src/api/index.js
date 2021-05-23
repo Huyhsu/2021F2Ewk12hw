@@ -86,19 +86,42 @@ export const updateUserInfoApi = async (email, password, displayName) => {
   return user;
 }
 
-export const addOrderApi = async (order) => {
+export const createOrderApi = async (order) => {
+  const user = auth.currentUser.uid;
   const orderRef = await allOrdersCollectionRef.doc();
   const id = orderRef.id;
   // Store Data for Aggregation Queries
   await orderRef.set({
     ...order,
-    id
+    id,
+    user
   });
   return { ...order, id };
+}
+
+export const getOrderById = async (orderId) => {
+  const doc = await allOrdersCollectionRef.doc(orderId).get();
+  return doc.data()
+}
+
+export const getOrderByUser = async () => {
+  const user = auth.currentUser.uid;
+  let jsonOrders = [];
+
+  // QUERY Orders
+  const querySnapshot = await allOrdersCollectionRef.where("user", "==", user).get();
+  querySnapshot.forEach((doc) => {
+    jsonOrders.push(doc.data());
+  });
+  return jsonOrders;
 }
 
 export const signOut = () => {
   auth.signOut();
 }
 
+export const checkLoginApi = () => {
+  const user = auth.currentUser;
+  return user.uid?  true : false;
+}
 

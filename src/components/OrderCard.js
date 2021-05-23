@@ -1,14 +1,14 @@
-import { useContext } from "react";
+import { useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { Row, Col, Spin } from "antd";
 import { LoadingOutlined } from '@ant-design/icons';
 import GooglePayButton from '@google-pay/button-react';
-import { savePaymentMethod } from "../actions"
+import { requestOrderDetail } from "../actions"
 import { StoreContext } from "../store";
 
-export default function OrderCard() {
-   const { state: { cart, orderInfo: { loading } }, dispatch } = useContext(StoreContext);
-   const { cartItems } = cart;
+export default function OrderCard({ orderId }) {
+   const { state: { orderDetail: { loading, order } }, dispatch } = useContext(StoreContext);
+   const { orderItems } = order;
    const history = useHistory()
    const antIcon = <LoadingOutlined style={{ fontSize: 80, color: "#8183ff" }} spin />;
 
@@ -37,33 +37,15 @@ export default function OrderCard() {
       transactionInfo: {
         totalPriceStatus: "FINAL",
         totalPriceLabel: "Total",
-        totalPrice: String(cart.totalPrice),
+        totalPrice: String(order.totalPrice),
         currencyCode: "USD",
         countryCode: "US"
       }
     };
 
-
-   const placeOrderHandler = (values) => {
-      console.log(values)
-      savePaymentMethod(dispatch, values)
-      history.push('/order');
-   };
-
-   const getTotalPrice = () => {
-      return (cartItems.length > 0) ?
-         cartItems.reduce((sum, item) => sum + item.price * item.qty, 0)
-         : 0;
-   }
-
-   const toPrice = (num) => Number(num.toFixed(2)); // 5.123 => "5.12" => 5.12
-   cart.itemsPrice = toPrice(
-      cart.cartItems.reduce((a, c) => a + c.qty * c.price, 0)
-   );
-   cart.shippingPrice = cart.itemsPrice > 100 ? toPrice(0) : toPrice(10);
-   cart.taxPrice = toPrice(0.15 * cart.itemsPrice);
-   cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
-
+   useEffect(() => {
+      requestOrderDetail(dispatch, orderId)
+   }, [orderId])
 
    return (
       <>
@@ -81,24 +63,24 @@ export default function OrderCard() {
                      <div className="card card-body">
                         <h2 style={{ color: 'white' }}>Shipping</h2>
                         <p>
-                           <strong>Name:</strong> {cart.shippingAddress.fullName} <br />
-                           <strong>Address: </strong> {cart.shippingAddress.address},
-                  {cart.shippingAddress.city}, {cart.shippingAddress.postalCode}
-                  ,{cart.shippingAddress.country}
+                           <strong>Name:</strong> {order.shippingAddress.fullName} <br />
+                           <strong>Address: </strong> {order.shippingAddress.address},
+                  {order.shippingAddress.city}, {order.shippingAddress.postalCode}
+                  ,{order.shippingAddress.country}
                         </p>
                      </div>
                      <div className="card card-body">
                         <h2 style={{ color: 'white' }}>Payment</h2>
                         <p>
-                           <strong>Method:</strong> {cart.paymentMethod}
+                           <strong>Method:</strong> {order.paymentMethod}
                         </p>
                      </div>
                      <div className="card card-body">
                         <h2 style={{ color: 'white' }}>Order Items</h2>
-                        {cartItems.length === 0 ? (
+                        {orderItems.length === 0 ? (
                            <div>Cart is empty</div>
                         ) : (
-                           cartItems.map(item => (
+                           orderItems.map(item => (
                               <li key={item.id} className="cart-item">
                                  <div className="cart-image">
                                     <img src={item.image} alt={item.name} />
@@ -120,7 +102,7 @@ export default function OrderCard() {
                         )}
                         <div className="cart-total-price-wrap">
                            Total
-            <div className="cart-total-price">${getTotalPrice()}</div>
+            <div className="cart-total-price">${order.totalPrice}</div>
                         </div>
                      </div>
 
@@ -133,22 +115,22 @@ export default function OrderCard() {
                         <h2 style={{ color: 'white' }}>Order Summary</h2>
                         <div className="row">
                            <div>Items</div>
-                           <div>${cart.itemsPrice}</div>
+                           <div>${order.itemsPrice}</div>
                         </div>
                         <div className="row">
                            <div>Shipping</div>
-                           <div>${cart.shippingPrice}</div>
+                           <div>${order.shippingPrice}</div>
                         </div>
                         <div className="row">
                            <div>Tax</div>
-                           <div>${cart.taxPrice}</div>
+                           <div>${order.taxPrice}</div>
                         </div>
                         <div className="row">
                            <div>
                               <strong> Order Total</strong>
                            </div>
                            <div>
-                              <strong>${cart.totalPrice}</strong>
+                              <strong>${order.totalPrice}</strong>
                            </div>
                         </div>
                         <GooglePayButton

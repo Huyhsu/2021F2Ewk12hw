@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { Form, Input, Button, Checkbox } from 'antd';
 import { WarningOutlined, MailOutlined, LockOutlined } from '@ant-design/icons';
-import { loginToFirebase, rememberLoginUser } from '../actions'
+import { checkLogin, loginToFirebase, rememberLoginUser } from '../actions'
 import { StoreContext } from "../store"
 
 const LoginCard = ({ redirect }) => {
@@ -19,8 +19,8 @@ const LoginCard = ({ redirect }) => {
     rememberLoginUser(dispatch, e.target.checked);
   }
 
-  useEffect(() => {
-    if(userInfo) history.push(redirect);
+  useEffect(() => {    
+    if( userInfo && checkLogin(dispatch) ) history.push(redirect);
   }, [ userInfo ]);// eslint-disable-line react-hooks/exhaustive-deps
 
   return (
